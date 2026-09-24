@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Project Supervisor Lookup</title>
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --card: #ffffff;
+    --text: #1a1d23;
+    --muted: #6b7280;
+    --accent: #2f5233;
+    --accent-2: #3d6b43;
+    --border: #e2e4e9;
+    --error: #b3261e;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14161a;
+      --card: #1e2126;
+      --text: #f0f1f3;
+      --muted: #9aa0a8;
+      --accent: #6fbf73;
+      --accent-2: #8ed592;
+      --border: #2c2f36;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14161a;
+    --card: #1e2126;
+    --text: #f0f1f3;
+    --muted: #9aa0a8;
+    --accent: #6fbf73;
+    --accent-2: #8ed592;
+    --border: #2c2f36;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif, "Noto Sans";
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 32px 16px 48px;
+  }
+  .wrap { width: 100%; max-width: 480px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 24px 30px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  h1 { font-size: 1.3rem; margin: 0 0 4px; color: var(--text); }
+  .sub { color: var(--muted); font-size: 0.9rem; margin: 0 0 22px; line-height: 1.4; }
+  label {
+    display: block; font-size: 0.82rem; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 6px;
+  }
+  .search-row { display: flex; gap: 8px; }
+  input[type="text"] {
+    flex: 1; min-width: 0; padding: 12px 14px; font-size: 1rem;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--bg); color: var(--text); outline: none;
+    transition: border-color 0.15s;
+  }
+  input[type="text"]:focus { border-color: var(--accent); }
+  button {
+    padding: 12px 18px; font-size: 1rem; font-weight: 600; border: none;
+    border-radius: 10px; background: var(--accent); color: #fff; cursor: pointer;
+    transition: background 0.15s; white-space: nowrap;
+  }
+  button:hover { background: var(--accent-2); }
+  button:disabled { opacity: 0.6; cursor: default; }
+  button:active { transform: translateY(1px); }
+  .result { margin-top: 22px; min-height: 20px; }
+  .result-card {
+    border-radius: 12px; padding: 18px 18px; text-align: center; animation: fade 0.2s ease;
+  }
+  .result-card.found {
+    background: color-mix(in srgb, var(--accent) 12%, var(--card));
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  }
+  .result-card.notfound {
+    background: color-mix(in srgb, var(--error) 10%, var(--card));
+    border: 1px solid color-mix(in srgb, var(--error) 35%, var(--border));
+  }
+  .result-label {
+    font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--muted); margin-bottom: 6px;
+  }
+  .result-value { font-size: 1.3rem; font-weight: 700; color: var(--text); }
+  .result-value.error { color: var(--error); font-size: 1rem; font-weight: 500; }
+  .phone-row {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border));
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+  .wa-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 9px 16px;
+    background: #25D366;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  .wa-link:hover { background: #1ebe57; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  .footer { text-align: center; color: var(--muted); font-size: 0.78rem; margin-top: 18px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Find Your Project Supervisor</h1>
+      <p class="sub">Enter your admission number exactly as registered (e.g. DSE-02-0229/2025) to see who is supervising your project.</p>
+      <label for="adm">Admission Number</label>
+      <div class="search-row">
+        <input type="text" id="adm" placeholder="e.g. DSE-02-0229/2025" autocomplete="off" autocapitalize="characters" />
+        <button id="btn">Search</button>
+      </div>
+      <div class="result" id="result"></div>
+    </div>
+    <div class="footer">If your name doesn't appear here, contact the project coordinator.</div>
+  </div>
+
+<script>
+  // Paste the Google Apps Script "Web App URL" here after deploying it.
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzNIHiJ4l6tyi7tc9SHwIIyiI_gpuGH8yOQYCaMskpic9e5cP4LGVQeGBcjCpyU8Inn/exec";
+
+  const input = document.getElementById('adm');
+  const btn = document.getElementById('btn');
+  const resultDiv = document.getElementById('result');
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  async function search() {
+    const raw = input.value.trim();
+    if (!raw) { resultDiv.innerHTML = ''; return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Searching...';
+    resultDiv.innerHTML = '';
+
+    try {
+      const url = SCRIPT_URL + '?adm=' + encodeURIComponent(raw);
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.found) {
+        let phoneHtml = '';
+        if (data.phone) {
+          const digits = data.phone.replace(/[^0-9]/g, '');
+          const waNumber = digits.startsWith('0') ? '254' + digits.slice(1) : digits;
+          const waLink = 'https://wa.me/' + waNumber;
+          phoneHtml =
+            '<div class="phone-row">' + escapeHtml(data.phone) + '</div>' +
+            '<a class="wa-link" href="' + waLink + '" target="_blank" rel="noopener">Message on WhatsApp</a>';
+        }
+        resultDiv.innerHTML =
+          '<div class="result-card found">' +
+            '<div class="result-label">Your Supervisor</div>' +
+            '<div class="result-value">' + escapeHtml(data.supervisor) + '</div>' +
+            phoneHtml +
+          '</div>';
+      } else {
+        resultDiv.innerHTML =
+          '<div class="result-card notfound">' +
+            '<div class="result-label">Not Found</div>' +
+            '<div class="result-value error">No record for that admission number. Please check it and try again, or contact the project coordinator.</div>' +
+          '</div>';
+      }
+    } catch (err) {
+      resultDiv.innerHTML =
+        '<div class="result-card notfound">' +
+          '<div class="result-label">Error</div>' +
+          '<div class="result-value error">Could not reach the lookup service. Please try again in a moment.</div>' +
+        '</div>';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Search';
+    }
+  }
+
+  btn.addEventListener('click', search);
+  input.addEventListener('keydown', function(e) { if (e.key === 'Enter') search(); });
+</script>
+</body>
+</html>
